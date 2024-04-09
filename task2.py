@@ -13,9 +13,6 @@ class Numbers:
         self.head = None
         self.tail = None
 
-    def __str__(self):
-        return f'{self.head}'
-
     def append(self, data):
         new_node = Node(data)
         if self.head is None:
