@@ -1,154 +1,151 @@
-# class Node:
-#     def __init__(self, data):
-#         self.data = data
-#         self.next = None
-#
-#     def __str__(self):
-#         return f'{self.data} -> {self.next}'
-#
-#
-# # node1 = Node(12)
-# # node2 = Node(99)
-# # node3 = Node(37)
-# # node1.next = node2
-# # node2.next = node3
-# # print(node1)
-# class LinkedList:
-#     def __init__(self):
-#         self.head = None
-#
-#     def __str__(self):
-#         return f'{self.head}'
-#
-#     def append(self, data):
-#         new_node = Node(data)
-#         if self.head is None:
-#             self.head = new_node
-#             return
-#
-#         tail = self.head
-#         while tail.next is not None:
-#             tail = tail.next
-#
-#         tail.next = new_node
-
-
-# my_list = LinkedList()
-# my_list.append(1)
-# my_list.append(2)
-# my_list.append(3)
-# my_list.append(4)
-# my_list.append(5)
-# print(my_list)
-
-# Double linked list
-
-# class Node1:
-#     def __init__(self, data):
-#         self.data = data
-#         self.next = None
-#         self.prev = None
-#
-#     def __str__(self):
-#         return f'{self.data} -> {self.next}'
-#
-#
-# class DoubleLinkedList:
-#     def __init__(self):
-#         self.head = None
-#
-#     def __str__(self):
-#         return f'{self.head}'
-#
-#     def append(self, data):
-#         new_node = Node1(data)
-#         if self.head is None:
-#             self.head = new_node
-#             return
-#
-#         tail = self.head
-#         while tail.next is not None:
-#             tail = tail.next
-#
-#         tail.next = new_node
-#         new_node.prev = tail
-#
-#
-# my_list = DoubleLinkedList()
-# my_list.append(1)
-# my_list.append(2)
-# my_list.append(3)
-# my_list.append(4)
-# my_list.append(5)
-# print(my_list)
-
-
-# passangers
 class Node:
     def __init__(self, data):
         self.data = data
-        self.next = None
         self.prev = None
-
-    def __str__(self):
-        return f'{self.data} -> {self.next}'
+        self.next = None
 
 
-class BoardingQueue:
+class Number:
     def __init__(self):
         self.head = None
         self.tail = None
 
-    def append(self, data):
+    def append_unique(self, data):
         new_node = Node(data)
         if self.head is None:
             self.head = new_node
             self.tail = new_node
             return
-
+        node = self.head
+        while node.next:
+            if node.data == data:
+                raise ValueError("Number is already exists")
+            else:
+                node = node.next
+        if node.data == data:
+            raise ValueError("Number is already exists")
         self.tail.next = new_node
-        new_node.prev = self.tail
-
+        node.prev = self.tail
         self.tail = new_node
 
-    def move_forward(self, data):
-        # find node with data
-        node = self.head
-        while node is not None and node.data != data:
-            node = node.next
-
-        if node is None:
-            print('Passanger not in queue')
+    def append(self, data):
+        node = Node(data)
+        if self.head is None:
+            self.head = node
+            self.tail = node
             return
 
-        red = node.prev
-        green = node
-        blue = node.next
-        black = node.next.next  # blue.next
+        self.tail.next = node
+        node.prev = self.tail
+        self.tail = node
 
-        # change links to head
-        red.next, green.next, blue.next = blue, black, green
+    def remove_all(self, data):
+        if self.head is None:
+            raise ValueError("List is empty")
+        if self.head.data == data and self.head.next is None:
+            self.head = None
+            return
+        node = self.head
+        while node.next:
+            if node.data == data:
+                if node == self.head:
+                    self.head = node.next
+                else:
+                    node.prev.next = node.next
+                    node.next.prev = node.prev
+            node = node.next
+        if node.data == data:
+            node.prev.next = None
+            self.tail = node.prev
 
-        # change links to tail
-        green.prev, blue.prev, black.prev = blue, red, green
-
-    def print(self):
+    def find_number(self, data):
         node = self.head
         while node is not None:
-            print(node.data, end='->')
-            node = node.next
+            if node.data == data:
+                return True
+            else:
+                node = node.next
+        return False
+
+    def print(self, desc=True):
+        if desc:
+            node = self.head
+            while node:
+                print(node.data, end='->')
+                node = node.next
+        else:
+            node = self.tail
+            while node:
+                print(node.data, end='->')
+                node = node.prev
+
+    def change_number(self, data, new_data, multi=False):
+        node = self.head
+        while node is not None:
+            if node.data == data:
+                node.data = new_data
+                if not multi:
+                    return
+            else:
+                node = node.next
 
 
-my_list = BoardingQueue()
-my_list.append(1)
-my_list.append(2)
-my_list.append(3)
-my_list.append(4)
-my_list.append(5)
-my_list.print()
+number = Number()
+try:
+    while True:
+        print("\nMenu:")
+        print("1. Add new number")
+        print("2. Remove all number entries")
+        print("3. Print list")
+        print("4. Check if number exist")
+        print("5. Change number")
+        print("6. Exit")
 
+        choice = input("Choose the option: ")
 
-my_list.move_forward(2)
-print('\n')
-my_list.print()
-
+        if choice == '1':
+            option = int(input("Enter '1' to add the unique number or '2' to add number without control: "))
+            num = input("Enter the number to add: ")
+            if option == 1:
+                number.append_unique(num)
+            elif option == 2:
+                number.append(num)
+            else:
+                print("Incorrect option")
+        elif choice == '2':
+            num = input("Enter the number to remove: ")
+            number.remove_all(num)
+        elif choice == '3':
+            option = int(input("Enter '1' to print list in desc order or '2' in asc order: "))
+            print("List info:")
+            if option == 1:
+                number.print()
+            elif option == 2:
+                number.print(desc=False)
+            else:
+                print("Incorrect option")
+        elif choice == '4':
+            num = input("Enter the number to find: ")
+            if number.find_number(num):
+                print("Number found")
+            else:
+                print("Number not found.")
+        elif choice == '5':
+            old_num = input("Enter number for search: ")
+            new_num = input("Enter new number: ")
+            option = int(input("Enter '1' to change first number entry or '2' to change all number entries: "))
+            if option == 1:
+                number.change_number(old_num, new_num)
+            elif option == 2:
+                number.change_number(old_num, new_num, multi=True)
+            else:
+                print("Incorrect option")
+        elif choice == '6':
+            print("Bye!")
+            break
+        else:
+            print("Unknown operation!")
+except ValueError as e:
+    print("Message: ", e)
+except Exception as e:
+    print("Message: ", e)
