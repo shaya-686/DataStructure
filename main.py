@@ -25,7 +25,7 @@ class Number:
         if node.data == data:
             raise ValueError("Number is already exists")
         self.tail.next = new_node
-        node.prev = self.tail
+        new_node.prev = self.tail
         self.tail = new_node
 
     def append(self, data):
@@ -44,12 +44,14 @@ class Number:
             raise ValueError("List is empty")
         if self.head.data == data and self.head.next is None:
             self.head = None
+            self.tail = None
             return
         node = self.head
         while node.next:
             if node.data == data:
                 if node == self.head:
                     self.head = node.next
+                    self.head.prev = None
                 else:
                     node.prev.next = node.next
                     node.next.prev = node.prev
@@ -149,3 +151,59 @@ except ValueError as e:
     print("Message: ", e)
 except Exception as e:
     print("Message: ", e)
+
+
+# Hanoi
+
+class Stack:
+    def __init__(self):
+        self.items = []
+
+    def is_empty(self):
+        return self.items == []
+
+    def push(self, item):
+        self.items.append(item)
+
+    def pop(self):
+        if not self.is_empty():
+            return self.items.pop()
+
+    def peek(self):
+        if not self.is_empty():
+            return self.items[-1]
+
+
+def hanoi(n, source, target, auxiliary):
+    if n == 1:
+        item = source.pop()
+        target.push(item)
+        return
+    print("Source: ", source.items)
+    print("Ax: ", auxiliary.items)
+    print("Target: ", target.items)
+    hanoi(n - 1, source, auxiliary, target)
+    item = source.pop()
+    target.push(item)
+    hanoi(n - 1, auxiliary, target, source)
+    print("Source: ", source.items)
+    print("Ax: ", auxiliary.items)
+    print("Target: ", target.items)
+
+
+def hanoi_tower(n):
+    source = Stack()
+    auxiliary = Stack()
+    target = Stack()
+
+    for i in range(n, 0, -1):
+        source.push(i)
+
+    hanoi(n, source, target, auxiliary)
+    print("Source: ", source.items)
+    print("Ax: ", auxiliary.items)
+    print("Target: ", target.items)
+
+
+# Приклад використання:
+hanoi_tower(7)
