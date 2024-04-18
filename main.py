@@ -1,172 +1,148 @@
-# class Node:
-#     def __init__(self, data):
-#         self.data = data
-#         self.left = None
-#         self.right = None
-#
-#
-# class BinaryTree:
-#     def __init__(self):
-#         self.root = None
-#
-#     def insert(self, data):
-#         if self.root is None:
-#             self.root = Node(data)
-#         else:
-#             self._recursive_insert(data, self.root)
-#
-#     def _recursive_insert(self, data, current_node):
-#         if data < current_node.data:
-#             if current_node.left is None:
-#                 current_node.left = Node(data)
-#             else:
-#                 self._recursive_insert(data, current_node.left)
-#         else:
-#             if current_node.right is None:
-#                 current_node.right = Node(data)
-#             else:
-#                 self._recursive_insert(data, current_node.right)
-#
-#     def min(self):
-#         if self.root is None:
-#             print("Tree is empty")
-#             return
-#         node = self.root
-#
-#         while node.left is not None:
-#             node = node.left
-#
-#         return node.data
-#
-#     def max(self):
-#         if self.root is None:
-#             print("Tree is empty")
-#             return
-#         node = self.root
-#
-#         while node.right is not None:
-#             node = node.right
-#
-#         return node.data
-#
-#     def __contains__(self, data):
-#         if self.root is None:
-#             print("Tree is empty")
-#             return
-#         node = self.root
-#
-#         while node:
-#             if node.data == data:
-#                 return True
-#             if data < node.data:
-#                 node = node.left
-#             else:
-#                 node = node.right
-#         return False
-#
-#     def print(self):
-#         if self.root is None:
-#             print("Tree is empty")
-#             return
-#
-#         self._inoder(self.root)
-#         print()
-#
-#     def _inoder(self, node):
-#         if node is not None:
-#             self._inoder(node.left)
-#             print(node.data, end=' ')
-#             self._inoder(node.right)
-#
-#     def _preoder(self, node):
-#         if node is not None:
-#             print(node.data, end=' ')
-#             self._preoder(node.left)
-#             self._preoder(node.right)
-#
-#     def _postoder(self, node):
-#         if node is not None:
-#             self._postoder(node.left)
-#             self._postoder(node.right)
-#             print(node.data, end=' ')
-#
-#
-# tree = BinaryTree()
-# tree.insert(3)
-# tree.insert(2)
-# tree.insert(4)
-# tree.insert(9)
-# tree.insert(7)
-# tree.insert(6)
-# print(tree.min())
-# print(tree.max())
-# print(4 in tree)
-# print(8 in tree)
-# tree.print()
-
 import bintrees
 
 
-class Book:
-    def __init__(self, title, author, year):
-        self.title = title
-        self.author = author
-        self.year = year
+class WordNode:
+    def __init__(self, word):
+        self.word = word
+        self.translates = []
+        self.popularity = 0
 
     def __str__(self):
-        return f"{self.title}, {self.author}, {self.year}"
+        return f"word: {self.word}, translates: {self.translates}, popularity: {self.popularity}"
 
 
-class Library:
+class Dictionary:
     def __init__(self):
         self.tree = bintrees.AVLTree()
 
-    def insert(self, title, author, year):
-        book = Book(title, author, year)
-        self.tree.insert(key=title, value=book)
-
-    def search(self, title):
-        if title in self.tree:
-            return self.tree[title]
+    def insert_word(self, word):
+        if word not in self.tree:
+            new_word = WordNode(word)
+            self.tree.insert(key=word, value=new_word)
         else:
-            print("Book doesn't exist")
+            raise ValueError("Existing word")
 
-    def delete(self, title):
-        if title in self.tree:
-            self.tree.remove(title)
+    def delete_word(self, word):
+        if word in self.tree:
+            self.tree.remove(word)
         else:
-            print("Book doesn't exist")
+            raise ValueError("Word doesn't exist")
+
+    def update_word(self, word, new_word):
+        if word in self.tree:
+            word_obj = WordNode(new_word)
+            self.tree.remove(word)
+            self.tree[new_word] = word_obj
+        else:
+            raise ValueError("Word doesn't exist")
+
+    def add_translation(self, word, translation):
+        if word in self.tree:
+            if translation in self.tree[word].translates:
+                raise ValueError("Existing translation")
+            self.tree[word].translates.append(translation)
+            self.tree[word].popularity += 1
+        else:
+            raise ValueError("Word doesn't exist")
+
+    def change_translation(self, word, translation, new_translation):
+        if word in self.tree:
+            if translation not in self.tree[word].translates:
+                raise ValueError("Translation not found")
+            for index, value in enumerate(self.tree[word].translates):
+                if value == translation:
+                    self.tree[word].translates[index] = new_translation
+                    self.tree[word].popularity += 1
+        else:
+            raise ValueError("Word doesn't exist")
+
+    def delete_translation(self, word, translation):
+        if word in self.tree:
+            if translation not in self.tree[word].translates:
+                raise ValueError("Translation not found")
+            if translation in self.tree[word].translates:
+                self.tree[word].translates.remove(translation)
+                self.tree[word].popularity += 1
+        else:
+            raise ValueError("Word doesn't exist")
 
     def display(self):
-        for book in self.tree.values():
-            print(book)
+        if len(self.tree) > 0:
+            for word in self.tree.values():
+                print(word)
+        else:
+            raise IndexError("Tree is empty")
+
+    def search(self, word):
+        if word in self.tree:
+            self.tree[word].popularity += 1
+            return self.tree[word]
+        else:
+            raise ValueError("Word doesn't exist")
 
     def count(self):
         return len(self.tree)
 
+    def lowest_popularity(self):
+        words = self.tree.values()
+        popularity = []
+        for word in words:
+            popularity.append((word, word.popularity))
+        min_popularity = min(popularity, key=lambda x: x[1])
+        return min_popularity[0]
 
-library = Library()
-
-library.insert("1984", "George Orwell", 1949)
-library.insert("To Kill a Mockingbird", "Harper Lee", 1960)
-library.insert("Pride and Prejudice", "Jane Austen", 1813)
-
-print("Books in library:")
-library.display()
-
-print("\nSearching for '1984':")
-book = library.search("1984")
-print(book)
-
-library.delete("To Kill a Mockingbird")
-print("\nBooks in library after deletion:")
-library.display()
-
-print("\nTotal number of books:", library.count())
+    def max_popularity(self):
+        words = self.tree.values()
+        popularity = []
+        for word in words:
+            popularity.append((word, word.popularity))
+        max_popularity = max(popularity, key=lambda x: x[1])
+        return max_popularity[0]
 
 
-class WordNode:
-    def __init__(self, word, translate):
-        self.word = 'ябко'
-        self.translate = {'apple'}
-        self.popularity = 0
+try:
+    dictionary = Dictionary()
+    print("Adding new words: ")
+    dictionary.insert_word("apple")
+    dictionary.insert_word("morning")
+    dictionary.insert_word("cat")
+    # dictionary.insert_word("cat")
+    dictionary.display()
+
+    print("Dictionary after deletion: ")
+    dictionary.delete_word("cat")
+    # dictionary.delete_word("cat")
+    dictionary.display()
+
+    print("Update word: ")
+    dictionary.update_word("apple", "cat")
+    # dictionary.update_word("banana", "cat")
+    dictionary.display()
+
+    print("Adding translation: ")
+    dictionary.add_translation("cat", "кіт")
+    dictionary.add_translation("cat", "кошеня")
+    # dictionary.add_translation("cat", "кошеня")
+    dictionary.add_translation("morning", "ранок")
+    dictionary.add_translation("morning", "раночок")
+    dictionary.add_translation("morning", "ранок4")
+    dictionary.display()
+
+    print("Changing translation: ")
+    dictionary.change_translation("morning", "ранок", "ранок2")
+    # dictionary.change_translation("morning", "ранок", "ранок2")
+    dictionary.display()
+
+    print("Delete translation: ")
+    dictionary.delete_translation("morning", "ранок2")
+    # dictionary.delete_translation("morning", "ранок3")
+    dictionary.display()
+    print("Min popularity: " , dictionary.lowest_popularity())
+    print("Max popularity: ", dictionary.max_popularity())
+    print("Search: ", dictionary.search("cat"))
+except ValueError as e:
+    print("Message: ", e)
+except IndexError as e:
+    print("Message: ", e)
+except Exception as e:
+    print("Message: ", e)
