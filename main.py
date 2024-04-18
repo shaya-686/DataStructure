@@ -1,154 +1,172 @@
 # class Node:
 #     def __init__(self, data):
 #         self.data = data
-#         self.next = None
-#
-#     def __str__(self):
-#         return f'{self.data} -> {self.next}'
+#         self.left = None
+#         self.right = None
 #
 #
-# # node1 = Node(12)
-# # node2 = Node(99)
-# # node3 = Node(37)
-# # node1.next = node2
-# # node2.next = node3
-# # print(node1)
-# class LinkedList:
+# class BinaryTree:
 #     def __init__(self):
-#         self.head = None
+#         self.root = None
 #
-#     def __str__(self):
-#         return f'{self.head}'
+#     def insert(self, data):
+#         if self.root is None:
+#             self.root = Node(data)
+#         else:
+#             self._recursive_insert(data, self.root)
 #
-#     def append(self, data):
-#         new_node = Node(data)
-#         if self.head is None:
-#             self.head = new_node
+#     def _recursive_insert(self, data, current_node):
+#         if data < current_node.data:
+#             if current_node.left is None:
+#                 current_node.left = Node(data)
+#             else:
+#                 self._recursive_insert(data, current_node.left)
+#         else:
+#             if current_node.right is None:
+#                 current_node.right = Node(data)
+#             else:
+#                 self._recursive_insert(data, current_node.right)
+#
+#     def min(self):
+#         if self.root is None:
+#             print("Tree is empty")
+#             return
+#         node = self.root
+#
+#         while node.left is not None:
+#             node = node.left
+#
+#         return node.data
+#
+#     def max(self):
+#         if self.root is None:
+#             print("Tree is empty")
+#             return
+#         node = self.root
+#
+#         while node.right is not None:
+#             node = node.right
+#
+#         return node.data
+#
+#     def __contains__(self, data):
+#         if self.root is None:
+#             print("Tree is empty")
+#             return
+#         node = self.root
+#
+#         while node:
+#             if node.data == data:
+#                 return True
+#             if data < node.data:
+#                 node = node.left
+#             else:
+#                 node = node.right
+#         return False
+#
+#     def print(self):
+#         if self.root is None:
+#             print("Tree is empty")
 #             return
 #
-#         tail = self.head
-#         while tail.next is not None:
-#             tail = tail.next
+#         self._inoder(self.root)
+#         print()
 #
-#         tail.next = new_node
+#     def _inoder(self, node):
+#         if node is not None:
+#             self._inoder(node.left)
+#             print(node.data, end=' ')
+#             self._inoder(node.right)
+#
+#     def _preoder(self, node):
+#         if node is not None:
+#             print(node.data, end=' ')
+#             self._preoder(node.left)
+#             self._preoder(node.right)
+#
+#     def _postoder(self, node):
+#         if node is not None:
+#             self._postoder(node.left)
+#             self._postoder(node.right)
+#             print(node.data, end=' ')
+#
+#
+# tree = BinaryTree()
+# tree.insert(3)
+# tree.insert(2)
+# tree.insert(4)
+# tree.insert(9)
+# tree.insert(7)
+# tree.insert(6)
+# print(tree.min())
+# print(tree.max())
+# print(4 in tree)
+# print(8 in tree)
+# tree.print()
+
+import bintrees
 
 
-# my_list = LinkedList()
-# my_list.append(1)
-# my_list.append(2)
-# my_list.append(3)
-# my_list.append(4)
-# my_list.append(5)
-# print(my_list)
-
-# Double linked list
-
-# class Node1:
-#     def __init__(self, data):
-#         self.data = data
-#         self.next = None
-#         self.prev = None
-#
-#     def __str__(self):
-#         return f'{self.data} -> {self.next}'
-#
-#
-# class DoubleLinkedList:
-#     def __init__(self):
-#         self.head = None
-#
-#     def __str__(self):
-#         return f'{self.head}'
-#
-#     def append(self, data):
-#         new_node = Node1(data)
-#         if self.head is None:
-#             self.head = new_node
-#             return
-#
-#         tail = self.head
-#         while tail.next is not None:
-#             tail = tail.next
-#
-#         tail.next = new_node
-#         new_node.prev = tail
-#
-#
-# my_list = DoubleLinkedList()
-# my_list.append(1)
-# my_list.append(2)
-# my_list.append(3)
-# my_list.append(4)
-# my_list.append(5)
-# print(my_list)
-
-
-# passangers
-class Node:
-    def __init__(self, data):
-        self.data = data
-        self.next = None
-        self.prev = None
+class Book:
+    def __init__(self, title, author, year):
+        self.title = title
+        self.author = author
+        self.year = year
 
     def __str__(self):
-        return f'{self.data} -> {self.next}'
+        return f"{self.title}, {self.author}, {self.year}"
 
 
-class BoardingQueue:
+class Library:
     def __init__(self):
-        self.head = None
-        self.tail = None
+        self.tree = bintrees.AVLTree()
 
-    def append(self, data):
-        new_node = Node(data)
-        if self.head is None:
-            self.head = new_node
-            self.tail = new_node
-            return
+    def insert(self, title, author, year):
+        book = Book(title, author, year)
+        self.tree.insert(key=title, value=book)
 
-        self.tail.next = new_node
-        new_node.prev = self.tail
+    def search(self, title):
+        if title in self.tree:
+            return self.tree[title]
+        else:
+            print("Book doesn't exist")
 
-        self.tail = new_node
+    def delete(self, title):
+        if title in self.tree:
+            self.tree.remove(title)
+        else:
+            print("Book doesn't exist")
 
-    def move_forward(self, data):
-        # find node with data
-        node = self.head
-        while node is not None and node.data != data:
-            node = node.next
+    def display(self):
+        for book in self.tree.values():
+            print(book)
 
-        if node is None:
-            print('Passanger not in queue')
-            return
-
-        red = node.prev
-        green = node
-        blue = node.next
-        black = node.next.next  # blue.next
-
-        # change links to head
-        red.next, green.next, blue.next = blue, black, green
-
-        # change links to tail
-        green.prev, blue.prev, black.prev = blue, red, green
-
-    def print(self):
-        node = self.head
-        while node is not None:
-            print(node.data, end='->')
-            node = node.next
+    def count(self):
+        return len(self.tree)
 
 
-my_list = BoardingQueue()
-my_list.append(1)
-my_list.append(2)
-my_list.append(3)
-my_list.append(4)
-my_list.append(5)
-my_list.print()
+library = Library()
+
+library.insert("1984", "George Orwell", 1949)
+library.insert("To Kill a Mockingbird", "Harper Lee", 1960)
+library.insert("Pride and Prejudice", "Jane Austen", 1813)
+
+print("Books in library:")
+library.display()
+
+print("\nSearching for '1984':")
+book = library.search("1984")
+print(book)
+
+library.delete("To Kill a Mockingbird")
+print("\nBooks in library after deletion:")
+library.display()
+
+print("\nTotal number of books:", library.count())
 
 
-my_list.move_forward(2)
-print('\n')
-my_list.print()
-
+class WordNode:
+    def __init__(self, word, translate):
+        self.word = 'ябко'
+        self.translate = {'apple'}
+        self.popularity = 0
