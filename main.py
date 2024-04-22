@@ -63,7 +63,7 @@ class TaxInspection:
             raise ValueError("Person already exists in tax inspection DB")
         self.tree[person.code] = {"person": person, "fines": []}
 
-    def update_tax_payer(self, person, name, city):
+    def update_taxpayer(self, person, name, city):
         if person.code not in self.tree:
             raise ValueError("Taxpayer not found")
         self.tree[person.code]["person"].update(name, city)
