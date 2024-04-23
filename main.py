@@ -1,177 +1,153 @@
-import bintrees
-from datetime import datetime
+import pickle
+import gzip
 import random
 
 
-class Person:
-    def __init__(self, code, name, city):
-        self.code = code
-        self.name = name
-        self.city = city
-
-    def __str__(self):
-        return (f'name - {self.name},'
-                f'code - {self.code},'
-                f'city - {self.city}')
-
-    def update(self, name, city):
-        if name is None and city is None:
-            raise ValueError("No data to update")
-
-        if name is not None:
-            self.name = name
-
-        if city is not None:
-            self.city = city
-
-
-class Fine:
-    fine_types = {"1001": 100, "1002": 200, "1003": 300}
-
-    def __init__(self, fine_id, fine_type, person: Person):
-        if fine_type not in self.fine_types:
-            raise ValueError("Unknown fine type")
-        self.type = fine_type
-        self.amount = self.fine_types[fine_type]
-        self.person = person
-        self.create_date = datetime.now()
-        self.payment_state = False
-        self.payment_date = None
-        self.id = fine_id
-
-    def __str__(self):
-        return (f'Fine info: '
-                f'id - {self.id}, type - {self.type}, amount - {self.amount}, '
-                f'creation date - {self.create_date}, payment state - {self.payment_state}, '
-                f'payment date - {self.payment_date}')
-
-    def pay_fine(self):
-        if self.payment_state:
-            raise ValueError("Fine has already payed")
-        else:
-            self.payment_state = True
-            self.payment_date = datetime.now()
-
-
-class TaxInspection:
+class Number:
 
     def __init__(self):
-        self.tree = bintrees.AVLTree()
+        self.numbers = [random.randint(1111, 9999) for _ in range(100)]
 
-    def add_taxpayer(self, person: Person):
-        if person.code in self.tree:
-            raise ValueError("Person already exists in tax inspection DB")
-        self.tree[person.code] = {"person": person, "fines": []}
+    def add_number(self, number, file):
+        if not isinstance(number, int):
+            raise ValueError("Number should be int")
+        new_numbers_list = self.read_numbers(file)
+        self.numbers = new_numbers_list
+        self.numbers.append(number)
+        self.write_numbers(file)
 
-    def update_taxpayer(self, person, name, city):
-        if person.code not in self.tree:
-            raise ValueError("Taxpayer not found")
-        self.tree[person.code]["person"].update(name, city)
-
-    def add_fine(self, fine: Fine):
-        if fine.person.code not in self.tree:
-            raise ValueError(f"Person with code {fine.person.code} not found")
-        self.tree[fine.person.code]["fines"].append(fine)
-
-    def pay_taxpayer_fine(self, fine: Fine):
-        if fine.person.code not in self.tree:
-            raise ValueError(f"Person with code {fine.person.code} not found")
-        if fine not in self.tree[fine.person.code]["fines"]:
-            raise ValueError(f"Fine {fine} not found")
-        fine.pay_fine()
-
-    def remove_fine(self, fine):
-        if fine.person.code not in self.tree:
-            raise ValueError(f"Person with code {fine.person.code} not found")
-        if fine not in self.tree[fine.person.code]["fines"]:
-            raise ValueError(f"Fine {fine.id} not found")
-
-        self.tree[fine.person.code]["fines"].remove(fine)
-
-    def display_all_fines(self):
-        if not self.tree:
-            raise IndexError("Tree is empty")
-        for value in self.tree.values():
-            person = value["person"]
-            fines = value["fines"]
-            if not fines:
-                print(f"No fines found for {person}")
-            else:
-                print(f"Person: {person}")
-                for fine in fines:
-                    print(str(fine))
-            print()
-
-    def display_taxpayer_fines(self, person: Person):
-        if person.code not in self.tree:
-            raise ValueError("Unknown taxpayer")
-        fines = self.tree[person.code]["fines"]
-        if not fines:
-            print("Taxpayer doesn't have fines")
+    def remove_number(self, number, file):
+        if not isinstance(number, int):
+            raise ValueError("Number should be int")
+        new_numbers_list = self.read_numbers(file)
+        self.numbers = new_numbers_list
+        if number in self.numbers:
+            self.numbers.remove(number)
+            self.write_numbers(file)
         else:
-            print(f"Person: {person}")
-            for fine in fines:
-                print(str(fine))
-            print()
+            raise ValueError("Number not found")
 
-    def display_fines_by_type(self, fine_types):
-        fines_found = False
-        for value in self.tree.values():
-            for fine in value["fines"]:
-                if fine.type in fine_types:
-                    print(str(fine))
-                    fines_found = True
-        if not fines_found:
-            print("No fines of the specified types found")
-        print()
+    def write_numbers(self, file):
+        with open(file, 'wb') as pickle_file:
+            pickle.dump(self.numbers, pickle_file)
 
-    def display_fines_by_city(self, cities):
-        fines_found = False
-        for value in self.tree.values():
-            person = value["person"]
-            if person.city in cities:
-                print(f"Person: {person}")
-                for fine in value["fines"]:
-                    print(str(fine))
-                    fines_found = True
-        if not fines_found:
-            print("No fines of the specified types found")
-        print()
+    def write_gzip_numbers(self, file):
+        with gzip.open(file, 'wb') as gzip_file:
+            serialized = pickle.dumps(self.numbers)
+            gzip_file.write(serialized)
+
+    def read_numbers(self, file):
+        with open(file, 'rb') as pickle_file:
+            read_numbers = pickle.load(pickle_file)
+        print(f"Origin list = {self.numbers} \nPickle list = {read_numbers}")
+        return read_numbers
+
+    def read_gzip_numbers(self, file):
+        with gzip.open(file, 'rb') as gzip_file:
+            serialized = gzip_file.read()
+            read_numbers = pickle.loads(serialized)
+        print(f"Origin list = {self.numbers} \nPickle list = {read_numbers}")
+        return read_numbers
 
 
-tax_inspection = TaxInspection()
-# for statistic
-names = ["Mary", "Alex", "Arthur", "David", "Emma"]
-cities = ["Kyiv", "Lviv", "Dnipro", "Kharkiv", "Odessa"]
-fine_types = ["1001", "1002", "1003"]
+num = Number()
 
-for i in range(len(names)):
-    person = Person(random.randint(10000000, 99999999), random.choice(names), random.choice(cities))
-    tax_inspection.add_taxpayer(person)
+print("Numbers from pickle: ")
+num.write_numbers('numbers.pickle')
+num.read_numbers('numbers.pickle')
 
-    for _ in range(random.randint(1, 3)):
-        fine_type = random.choice(fine_types)
-        fine = Fine(random.randint(1000, 9999), fine_type, person)
-        tax_inspection.add_fine(fine)
+print("Updated list: ")
+num.add_number(9999999, 'numbers.pickle')
+num.read_numbers('numbers.pickle')
 
-print("All fines: ")
-tax_inspection.display_all_fines()
+print("Numbers from gzip: ")
+num.write_gzip_numbers('numbers.gz')
+num.read_gzip_numbers('numbers.gz')
 
-print("Fines with codes ['1001', '1002']: ")
-tax_inspection.display_fines_by_type(["1001", "1002"])
+print("Numbers after remove: ")
+num.remove_number(9999999, 'numbers.pickle')
+num.read_numbers('numbers.pickle')
 
-print("Persons with cities ['Kyiv', 'Lviv']: ")
-tax_inspection.display_fines_by_city(["Kyiv", "Lviv"])
 
-# to check other methods
-new_person = Person(603200000, "Olga", "Lviv")
-new_fine = Fine(10000, "1001", new_person)
-tax_inspection.add_taxpayer(new_person)
-tax_inspection.add_fine(new_fine)
-tax_inspection.display_taxpayer_fines(new_person)
-tax_inspection.pay_taxpayer_fine(new_fine)
-tax_inspection.display_taxpayer_fines(new_person)
-tax_inspection.update_taxpayer(new_person, None, "Kyiv")
-tax_inspection.display_taxpayer_fines(new_person)
-tax_inspection.remove_fine(new_fine)
-tax_inspection.display_taxpayer_fines(new_person)
+class Login:
+
+    def __init__(self):
+        self.logins = {"test": "12345", "test1": "123dd"}
+
+    def add_login(self, login, password, file):
+        new_login_dict = self.read_login(file)
+        self.logins = new_login_dict
+        self.logins[login] = password
+        self.write_login(file)
+
+    def remove_login(self, login, file):
+        new_login_dict = self.read_login(file)
+        self.logins = new_login_dict
+        if login in self.logins:
+            del self.logins[login]
+            self.write_login(file)
+        else:
+            raise ValueError("Login not found")
+
+    def find_login(self, login, file):
+        read_login = self.read_login(file)
+        if login in read_login:
+            print(f"Login: {login}, password: {read_login[login]}")
+        else:
+            print("Login not found")
+
+    def change_password(self, login, password, file):
+        read_login = self.read_login(file)
+        if login in read_login:
+            read_login[login] = password
+            self.logins = read_login
+            self.write_login(file)
+        else:
+            print("Login not found")
+
+    def write_login(self, file):
+        with open(file, 'wb') as pickle_file:
+            pickle.dump(self.logins, pickle_file)
+
+    def write_gzip_login(self, file):
+        with gzip.open(file, 'wb') as gzip_file:
+            serialized = pickle.dumps(self.logins)
+            gzip_file.write(serialized)
+
+    def read_login(self, file):
+        with open(file, 'rb') as pickle_file:
+            read_logins = pickle.load(pickle_file)
+        print(f"Origin list = {self.logins} \nPickle list = {read_logins}")
+        return read_logins
+
+    def read_gzip_login(self, file):
+        with gzip.open(file, 'rb') as gzip_file:
+            serialized = gzip_file.read()
+            read_logins = pickle.loads(serialized)
+        print(f"Origin list = {self.logins} \nPickle list = {read_logins}")
+        return read_logins
+
+
+new_login = Login()
+print("Numbers from pickle: ")
+new_login.write_login('new_login.pickle')
+new_login.read_login('new_login.pickle')
+
+print("Login from gzip: ")
+new_login.write_gzip_login('new_login.gz')
+new_login.read_gzip_login('new_login.gz')
+
+print("Updated dict: ")
+new_login.add_login("test5", "122222", 'new_login.pickle')
+new_login.read_login('new_login.pickle')
+
+print("Dict after remove: ")
+new_login.remove_login("test5", 'new_login.pickle')
+new_login.read_login('new_login.pickle')
+
+print("Change password: ")
+new_login.change_password("test", "44444", 'new_login.pickle')
+
+
+print("Find login: ")
+new_login.find_login("test", 'new_login.pickle')
