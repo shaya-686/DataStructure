@@ -19,8 +19,6 @@ class Number:
     def remove_number(self, number, file):
         if not isinstance(number, int):
             raise ValueError("Number should be int")
-        new_numbers_list = self.read_numbers(file)
-        self.numbers = new_numbers_list
         if number in self.numbers:
             self.numbers.remove(number)
             self.write_numbers(file)
@@ -81,26 +79,21 @@ class Login:
         self.write_login(file)
 
     def remove_login(self, login, file):
-        new_login_dict = self.read_login(file)
-        self.logins = new_login_dict
         if login in self.logins:
             del self.logins[login]
             self.write_login(file)
         else:
             raise ValueError("Login not found")
 
-    def find_login(self, login, file):
-        read_login = self.read_login(file)
-        if login in read_login:
-            print(f"Login: {login}, password: {read_login[login]}")
+    def find_login(self, login):
+        if login in self.logins:
+            print(f"Login: {login}, password: {self.logins[login]}")
         else:
             print("Login not found")
 
     def change_password(self, login, password, file):
-        read_login = self.read_login(file)
-        if login in read_login:
-            read_login[login] = password
-            self.logins = read_login
+        if login in self.logins:
+            self.logins[login] = password
             self.write_login(file)
         else:
             print("Login not found")
@@ -147,7 +140,7 @@ new_login.read_login('new_login.pickle')
 
 print("Change password: ")
 new_login.change_password("test", "44444", 'new_login.pickle')
-
+new_login.read_login('new_login.pickle')
 
 print("Find login: ")
-new_login.find_login("test", 'new_login.pickle')
+new_login.find_login("test")
