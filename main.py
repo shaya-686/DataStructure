@@ -1,146 +1,209 @@
 import pickle
 import gzip
-import random
 
 
-class Number:
-
-    def __init__(self):
-        self.numbers = [random.randint(1111, 9999) for _ in range(100)]
-
-    def add_number(self, number, file):
-        if not isinstance(number, int):
-            raise ValueError("Number should be int")
-        new_numbers_list = self.read_numbers(file)
-        self.numbers = new_numbers_list
-        self.numbers.append(number)
-        self.write_numbers(file)
-
-    def remove_number(self, number, file):
-        if not isinstance(number, int):
-            raise ValueError("Number should be int")
-        if number in self.numbers:
-            self.numbers.remove(number)
-            self.write_numbers(file)
-        else:
-            raise ValueError("Number not found")
-
-    def write_numbers(self, file):
-        with open(file, 'wb') as pickle_file:
-            pickle.dump(self.numbers, pickle_file)
-
-    def write_gzip_numbers(self, file):
-        with gzip.open(file, 'wb') as gzip_file:
-            serialized = pickle.dumps(self.numbers)
-            gzip_file.write(serialized)
-
-    def read_numbers(self, file):
-        with open(file, 'rb') as pickle_file:
-            read_numbers = pickle.load(pickle_file)
-        print(f"Origin list = {self.numbers} \nPickle list = {read_numbers}")
-        return read_numbers
-
-    def read_gzip_numbers(self, file):
-        with gzip.open(file, 'rb') as gzip_file:
-            serialized = gzip_file.read()
-            read_numbers = pickle.loads(serialized)
-        print(f"Origin list = {self.numbers} \nPickle list = {read_numbers}")
-        return read_numbers
-
-
-num = Number()
-
-print("Numbers from pickle: ")
-num.write_numbers('numbers.pickle')
-num.read_numbers('numbers.pickle')
-
-print("Updated list: ")
-num.add_number(9999999, 'numbers.pickle')
-num.read_numbers('numbers.pickle')
-
-print("Numbers from gzip: ")
-num.write_gzip_numbers('numbers.gz')
-num.read_gzip_numbers('numbers.gz')
-
-print("Numbers after remove: ")
-num.remove_number(9999999, 'numbers.pickle')
-num.read_numbers('numbers.pickle')
-
-
-class Login:
+class Countries:
+    country_file_pickle = 'country.pickle'
 
     def __init__(self):
-        self.logins = {"test": "12345", "test1": "123dd"}
+        self.countries = {
+            "United States": "Washington, D.C.",
+            "United Kingdom": "London",
+            "France": "Paris",
+            "Germany": "Berlin",
+            "China": "Beijing",
+            "Brazil": "Brasília",
+            "Japan": "Tokyo",
+            "India": "New Delhi",
+            "Australia": "Canberra",
+            "Ukraine": "Kyiv"
+        }
 
-    def add_login(self, login, password, file):
-        new_login_dict = self.read_login(file)
-        self.logins = new_login_dict
-        self.logins[login] = password
-        self.write_login(file)
+    def add_country(self, country, capital):
+        if country in self.countries:
+            raise ValueError("The country already exists")
+        self.countries[country] = capital
+        self.upload_countries()
 
-    def remove_login(self, login, file):
-        if login in self.logins:
-            del self.logins[login]
-            self.write_login(file)
-        else:
-            raise ValueError("Login not found")
+    def remove_country(self, country):
+        if not self.countries:
+            raise IndexError("Dictionary is empty")
+        if country not in self.countries:
+            raise ValueError("Country not found")
+        del self.countries[country]
+        self.upload_countries()
 
-    def find_login(self, login):
-        if login in self.logins:
-            print(f"Login: {login}, password: {self.logins[login]}")
-        else:
-            print("Login not found")
+    def change_country(self, country, capital):
+        if not self.countries:
+            raise IndexError("Dictionary is empty")
+        if country not in self.countries:
+            raise ValueError("Country not found")
+        self.countries[country] = capital
+        self.upload_countries()
 
-    def change_password(self, login, password, file):
-        if login in self.logins:
-            self.logins[login] = password
-            self.write_login(file)
-        else:
-            print("Login not found")
+    def find_country(self, country):
+        if not self.countries:
+            raise IndexError("Dictionary is empty")
+        if country in self.countries:
+            print(f"Country found: country - {country}, capital - {self.countries[country]}")
 
-    def write_login(self, file):
-        with open(file, 'wb') as pickle_file:
-            pickle.dump(self.logins, pickle_file)
+    def upload_countries(self):
+        if not self.countries:
+            raise IndexError("Dictionary is empty")
+        with open(self.country_file_pickle, 'wb') as pickle_file:
+            pickle.dump(self.countries, pickle_file)
 
-    def write_gzip_login(self, file):
-        with gzip.open(file, 'wb') as gzip_file:
-            serialized = pickle.dumps(self.logins)
+    def download_countries(self):
+        with open(self.country_file_pickle, 'rb') as pickle_file:
+            read_countries = pickle.load(pickle_file)
+        print(f"Origin list = {self.countries} \nPickle list = {read_countries}")
+
+    def print_countries(self):
+        if not self.countries:
+            raise IndexError("Dictionary is empty")
+        for key, value in self.countries.items():
+            print(f"Country: {key}, capital: {value}")
+
+
+countries = Countries()
+
+try:
+
+    countries.print_countries()
+
+    countries.upload_countries()
+    countries.download_countries()
+
+    countries.find_country("Ukraine")
+
+    countries.add_country("Italy", "Roma")
+    countries.download_countries()
+
+    countries.remove_country("Germany")
+    countries.download_countries()
+
+    countries.change_country("India", "New-Delhi")
+    countries.download_countries()
+
+    countries.add_country("India", "Roma")
+    countries.download_countries()
+
+except ValueError as e:
+    print("Message: ", e)
+except IndexError as e:
+    print("Message: ", e)
+except Exception as e:
+    print("Message: ", e)
+
+
+class Bands:
+    bands_file_gzip = 'bands.gzip'
+
+    def __init__(self):
+        self.bands = {
+            "Depeche Mode": {"Memento mori", "Spirit", "Delta Machine", "Sounds of the Universe", "Playing the Angel",
+                             "Exciter", "Ultra", "Songs of Faith and Devotion", "Violator", "Music for the Masses",
+                             "Black Celebration", "Some Great Reward", "Construction Time Again", "A Broken Frame",
+                             "Speak & Spell"},
+            "Queen": {"Queen", "Queen II", "Sheer Heart Attack", "A Night at the Opera", "A Day at the Races",
+                      "News of the World", "Jazz", "The Game", "Flash Gordon", "Hot Space", "The Works",
+                      "A Kind of Magic", "The Miracle", "Innuendo", "Made in Heaven"},
+            "Imagine Dragons": {"Night Visions", "Smoke + Mirrors", "Evolve", "Origins"},
+            "Океан Ельзи": {"Там, де нас нема", "Янанебібув", "Суперсиметрія", "GLORIA", "Dolce Vita", "Модель",
+                            "Земля", "Без меж", "Міра"}}
+
+    def add_band(self, band, album):
+        if band in self.bands:
+            raise ValueError("The band already exists")
+        self.bands[band] = {album}
+        self.upload_bands()
+
+    def remove_band(self, band):
+        if not self.bands:
+            raise IndexError("Dictionary is empty")
+        if band not in self.bands:
+            raise ValueError("Band not found")
+        del self.bands[band]
+        self.upload_bands()
+
+    def add_album(self, band, album):
+        if not self.bands:
+            raise IndexError("Dictionary is empty")
+        if band not in self.bands:
+            raise ValueError("Band not found")
+        self.bands[band].add(album)
+        self.upload_bands()
+
+    def remove_album(self, band, album):
+        if not self.bands:
+            raise IndexError("Dictionary is empty")
+        if band not in self.bands:
+            raise ValueError("Band not found")
+        self.bands[band].remove(album)
+        self.upload_bands()
+
+    def change_band(self, band, album, new_album):
+        if not self.bands:
+            raise IndexError("Dictionary is empty")
+        if band not in self.bands:
+            raise ValueError("Band not found")
+        self.bands[band].remove(album)
+        self.bands[band].add(new_album)
+        self.upload_bands()
+
+    def find_band(self, band):
+        if not self.bands:
+            raise IndexError("Dictionary is empty")
+        if band in self.bands:
+            print(f"Band found: band - {band}, albums - {self.bands[band]}")
+
+    def upload_bands(self):
+        if not self.bands:
+            raise IndexError("Dictionary is empty")
+        with gzip.open(self.bands_file_gzip, 'wb') as gzip_file:
+            serialized = pickle.dumps(self.bands)
             gzip_file.write(serialized)
 
-    def read_login(self, file):
-        with open(file, 'rb') as pickle_file:
-            read_logins = pickle.load(pickle_file)
-        print(f"Origin list = {self.logins} \nPickle list = {read_logins}")
-        return read_logins
-
-    def read_gzip_login(self, file):
-        with gzip.open(file, 'rb') as gzip_file:
+    def download_bands(self):
+        with gzip.open(self.bands_file_gzip, 'rb') as gzip_file:
             serialized = gzip_file.read()
-            read_logins = pickle.loads(serialized)
-        print(f"Origin list = {self.logins} \nPickle list = {read_logins}")
-        return read_logins
+            read_bands = pickle.loads(serialized)
+        print(f"Origin list = {self.bands} \nGzip list = {read_bands}")
+
+    def print_bands(self):
+        if not self.bands:
+            raise IndexError("Dictionary is empty")
+        for key, value in self.bands.items():
+            print(f"Band: {key}, albums: {value}")
 
 
-new_login = Login()
-print("Numbers from pickle: ")
-new_login.write_login('new_login.pickle')
-new_login.read_login('new_login.pickle')
+bands = Bands()
+try:
 
-print("Login from gzip: ")
-new_login.write_gzip_login('new_login.gz')
-new_login.read_gzip_login('new_login.gz')
+    bands.upload_bands()
+    bands.download_bands()
 
-print("Updated dict: ")
-new_login.add_login("test5", "122222", 'new_login.pickle')
-new_login.read_login('new_login.pickle')
+    bands.add_band("Maneskin", "Rush!")
+    bands.download_bands()
 
-print("Dict after remove: ")
-new_login.remove_login("test5", 'new_login.pickle')
-new_login.read_login('new_login.pickle')
+    bands.change_band("Maneskin", "Rush!", "Rush1!")
+    bands.download_bands()
 
-print("Change password: ")
-new_login.change_password("test", "44444", 'new_login.pickle')
-new_login.read_login('new_login.pickle')
+    bands.remove_band("Maneskin")
+    bands.download_bands()
 
-print("Find login: ")
-new_login.find_login("test")
+    bands.find_band("Depeche Mode")
+
+    bands.add_album("Depeche Mode", "New")
+    bands.download_bands()
+
+    bands.remove_album("Depeche Mode", "New")
+    bands.download_bands()
+
+    bands.print_bands()
+except ValueError as e:
+    print("Message: ", e)
+except IndexError as e:
+    print("Message: ", e)
+except Exception as e:
+    print("Message: ", e)
