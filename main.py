@@ -1,62 +1,86 @@
-import pickle
-import gzip
+import json
 
-data = {"login": "some_login", "password": "123456"}
+data = {"name": "Jhon", "age": 42, "info": {"city": "Kharkiv", "birthday": "2001"}}
 
+# with open("data.json", 'w') as file:
+#     json.dump(data, file)
 
-#
-# serialized = pickle.dumps(data)
-#
-# print(serialized)
-#
-# read_data = pickle.loads(serialized)
-# print(type(read_data), read_data)
-# with open('data.pickle', 'wb') as file:
-#     pickle.dump(data, file)
-#
-# with open('data.pickle', 'rb') as file:
-#     read_data = pickle.load(file)
-#
-# print(type(read_data), read_data)
-# with gzip.open('data.gz', 'wb') as file:
-#     serialized = pickle.dumps(data)
-#     file.write(serialized)
+with open("data.json", 'r') as file:
+    read_data = json.load(file)
 
-# with gzip.open('data.gz', 'rb') as file:
-#     serialized = file.read()
-#     read_data = pickle.loads(serialized)
-#
-# print(serialized)
-# print(type(read_data), read_data)
+print(read_data)
 
 
-# task1
 class Person:
     def __init__(self, name, age):
         self.name = name
         self.age = age
 
     def print_info(self):
-        print(f'name: {self.name} with age {self.age}')
+        print(self.name, self.age)
+
+    def save(self, filename='person.json'):
+        dct = {"name": self.name, "age": self.age}
+        with open(filename, 'w') as file:
+            json.dump(dct, file)
+
+    def load(self, filename='person.json'):
+        with open(filename, 'r') as file:
+            dct = json.load(file)
+            self.name = dct["name"]
+            self.age = dct["age"]
+
+    @classmethod
+    def load_person(cls, filename='person.json'):
+        with open(filename, 'r') as file:
+            dct = json.load(file)
+        return cls(name=dct["name"], age=dct["age"])
+
+    @classmethod
+    def save_persons(cls, persons, filename='person3.json'):
+        data = []
+
+        for person in persons:
+            dct = {"name": person.name, "age": person.age}
+            data.append(dct)
+            # data = [{"name": person.name, "age": person.age} for person in persons]
+            # data = [person.person_get_dict() for person in persons]
+
+            with open(filename, 'w') as file:
+                json.dump(data, file, indent=4)
+
+    @classmethod
+    def load_persons(cls, filename='person3.json'):
+        with open(filename, 'r') as file:
+            data = json.load(file)
+
+        persons = []
+        for dct in data:
+            person = cls(dct["name"], dct["age"])
+            persons.append(person)
+        return persons
+
+    def person_get_dict(self):
+        return {"name": self.name, "age": self.age}
+
+    def birthday(self):
+        self.age += 1
 
 
-person = Person("Anna", 31)
-# with open('person.pickle', 'wb') as file:
-#     pickle.dump(person, file)
-#
-# with open('person.pickle', 'rb') as file:
-#     read_person = pickle.load(file)
-#
-# print(type(read_person))
-# read_person.print_info()
+person = Person("Max", 16)
+# person.birthday()
+# person.birthday()
+# person.birthday()
+person.save()
+person.load()
+person.print_info()
 
-with gzip.open('person.gz', 'wb') as file:
-    person_serialized = pickle.dumps(person)
-    file.write(person_serialized)
+new_person = Person.load_person()
+new_person.print_info()
+person1 = Person("Alla", 25)
+person2 = Person("Al", 15)
+person3 = Person("HAlla", 35)
+Person.save_persons([person1, person2, person3])
 
-with gzip.open('person.gz', 'rb') as file:
-    read_data = file.read()
-    person_read = pickle.loads(read_data)
-
-print(type(person_read))
-person_read.print_info()
+for read_data in Person.load_persons():
+    read_data.print_info()
