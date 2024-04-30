@@ -1,86 +1,141 @@
-import json
-
-data = {"name": "Jhon", "age": 42, "info": {"city": "Kharkiv", "birthday": "2001"}}
-
-# with open("data.json", 'w') as file:
-#     json.dump(data, file)
-
-with open("data.json", 'r') as file:
-    read_data = json.load(file)
-
-print(read_data)
+import threading
+import queue
+import multiprocessing as mp
 
 
-class Person:
-    def __init__(self, name, age):
-        self.name = name
-        self.age = age
+# def print_info(info):
+#     print(info)
+#
+#
+# def sort_array(arr):
+#     print(sorted(arr))
+#
+#
+# t3 = threading.Thread(target=print_info, args=([2, 5, 3, 4, 8, 7],))
+# t4 = threading.Thread(target=print_info, args=([2, 5, 9, 7],))
+# t1 = threading.Thread(target=print_info, args=("Thread1",))
+# t2 = threading.Thread(target=print_info, args=("Thread2",))
+#
+# t3.start()
+# t4.start()
+# t1.start()
+# t2.start()
+#
+# t1.join()
+# t2.join()
+#
+# t3.join()
+# t4.join()
 
-    def print_info(self):
-        print(self.name, self.age)
-
-    def save(self, filename='person.json'):
-        dct = {"name": self.name, "age": self.age}
-        with open(filename, 'w') as file:
-            json.dump(dct, file)
-
-    def load(self, filename='person.json'):
-        with open(filename, 'r') as file:
-            dct = json.load(file)
-            self.name = dct["name"]
-            self.age = dct["age"]
-
-    @classmethod
-    def load_person(cls, filename='person.json'):
-        with open(filename, 'r') as file:
-            dct = json.load(file)
-        return cls(name=dct["name"], age=dct["age"])
-
-    @classmethod
-    def save_persons(cls, persons, filename='person3.json'):
-        data = []
-
-        for person in persons:
-            dct = {"name": person.name, "age": person.age}
-            data.append(dct)
-            # data = [{"name": person.name, "age": person.age} for person in persons]
-            # data = [person.person_get_dict() for person in persons]
-
-            with open(filename, 'w') as file:
-                json.dump(data, file, indent=4)
-
-    @classmethod
-    def load_persons(cls, filename='person3.json'):
-        with open(filename, 'r') as file:
-            data = json.load(file)
-
-        persons = []
-        for dct in data:
-            person = cls(dct["name"], dct["age"])
-            persons.append(person)
-        return persons
-
-    def person_get_dict(self):
-        return {"name": self.name, "age": self.age}
-
-    def birthday(self):
-        self.age += 1
+# global_number = 0
+# global_list = []
+# lock = threading.Lock()
 
 
-person = Person("Max", 16)
-# person.birthday()
-# person.birthday()
-# person.birthday()
-person.save()
-person.load()
-person.print_info()
+# def append():
+#     for _ in range(100000):
+#         global global_list
+#         lock.acquire()
+#         global_list.append(1)
+#         lock.release()
+#
+#
+# def remove():
+#     for _ in range(100):
+#         global global_list
+#         lock.acquire()
+#         global_list.pop()
+#         lock.release()
+#
+#
+# t1 = threading.Thread(target=append, args=())
+# t2 = threading.Thread(target=remove, args=())
+#
+# t1.start()
+# t2.start()
+#
+# t1.join()
+# t2.join()
+#
+# print("Final result: ", global_list)
 
-new_person = Person.load_person()
-new_person.print_info()
-person1 = Person("Alla", 25)
-person2 = Person("Al", 15)
-person3 = Person("HAlla", 35)
-Person.save_persons([person1, person2, person3])
 
-for read_data in Person.load_persons():
-    read_data.print_info()
+# tasks = queue.Queue()
+# num_threads = 5
+
+
+# def worker(tasks, thread_num):
+#     while True:
+#         task = tasks.get()
+#
+#         if task is None:
+#             break
+#         print(f"Thread: {thread_num} works with {task}")
+#         tasks.task_done()
+#
+#
+# for i in range(10):
+#     tasks.put(f"Task {i + 1}")
+#
+# for _ in range(num_threads):
+#     tasks.put(None)
+#
+# threads = []
+#
+# for i in range(num_threads):
+#     t = threading.Thread(target=worker, args=(tasks, i+1,))
+#     threads.append(t)
+#
+# for t in threads:
+#     t.start()
+#
+# for t in threads:
+#     t.join()
+
+##multiproxessing
+
+# def print_info(info):
+#     for _ in range(10):
+#         print(info)
+#
+#
+# def sort_array(arr):
+#     for _ in range(10):
+#         print(sorted(arr))
+#
+#
+# if __name__ == "__main__":
+#     print("Max number of processes:", mp.cpu_count())
+#     p1 = mp.Process(target=print_info, args=("Process1",))
+#     p2 = mp.Process(target=sort_array, args=([2, 5, 9, 7],))
+#
+#     p1.start()
+#     p2.start()
+#
+#     p1.join()
+#     p2.join()
+
+
+def mean(arr):
+    suma = sum(arr)
+    return suma / len(arr)
+
+
+def get_parts(arr, num=mp.cpu_count()):
+    n = len(arr)
+    part_len = n // num
+    return [arr[(part_len * k):part_len * (k + 1)] for k in range(num)]
+
+
+def get_arr(len=100_000):
+    return list(range(len))
+
+
+if __name__ == "__main__":
+    arr = get_arr()
+    parts = get_parts(arr)
+    with mp.Pool() as pool:
+        results = pool.map(func=mean, iterable=parts)
+    print("Results of pool: ", results)
+    print("Final mean result: ", mean(results))
+
