@@ -1,141 +1,110 @@
 import threading
-import queue
-import multiprocessing as mp
+import pickle
 
 
-# def print_info(info):
-#     print(info)
-#
-#
-# def sort_array(arr):
-#     print(sorted(arr))
-#
-#
-# t3 = threading.Thread(target=print_info, args=([2, 5, 3, 4, 8, 7],))
-# t4 = threading.Thread(target=print_info, args=([2, 5, 9, 7],))
-# t1 = threading.Thread(target=print_info, args=("Thread1",))
-# t2 = threading.Thread(target=print_info, args=("Thread2",))
-#
-# t3.start()
-# t4.start()
-# t1.start()
-# t2.start()
-#
-# t1.join()
-# t2.join()
-#
-# t3.join()
-# t4.join()
-
-# global_number = 0
-# global_list = []
-# lock = threading.Lock()
+#task1 - task2
+def max_number(arr):
+    if not arr:
+        raise IndexError("List is empty")
+    print(f"Max number: {max(arr)}")
 
 
-# def append():
-#     for _ in range(100000):
-#         global global_list
-#         lock.acquire()
-#         global_list.append(1)
-#         lock.release()
-#
-#
-# def remove():
-#     for _ in range(100):
-#         global global_list
-#         lock.acquire()
-#         global_list.pop()
-#         lock.release()
-#
-#
-# t1 = threading.Thread(target=append, args=())
-# t2 = threading.Thread(target=remove, args=())
-#
-# t1.start()
-# t2.start()
-#
-# t1.join()
-# t2.join()
-#
-# print("Final result: ", global_list)
+def min_number(arr):
+    if not arr:
+        raise IndexError("List is empty")
+    print(f"Min number: {min(arr)}")
 
 
-# tasks = queue.Queue()
-# num_threads = 5
-
-
-# def worker(tasks, thread_num):
-#     while True:
-#         task = tasks.get()
-#
-#         if task is None:
-#             break
-#         print(f"Thread: {thread_num} works with {task}")
-#         tasks.task_done()
-#
-#
-# for i in range(10):
-#     tasks.put(f"Task {i + 1}")
-#
-# for _ in range(num_threads):
-#     tasks.put(None)
-#
-# threads = []
-#
-# for i in range(num_threads):
-#     t = threading.Thread(target=worker, args=(tasks, i+1,))
-#     threads.append(t)
-#
-# for t in threads:
-#     t.start()
-#
-# for t in threads:
-#     t.join()
-
-##multiproxessing
-
-# def print_info(info):
-#     for _ in range(10):
-#         print(info)
-#
-#
-# def sort_array(arr):
-#     for _ in range(10):
-#         print(sorted(arr))
-#
-#
-# if __name__ == "__main__":
-#     print("Max number of processes:", mp.cpu_count())
-#     p1 = mp.Process(target=print_info, args=("Process1",))
-#     p2 = mp.Process(target=sort_array, args=([2, 5, 9, 7],))
-#
-#     p1.start()
-#     p2.start()
-#
-#     p1.join()
-#     p2.join()
+def suma(arr):
+    if not arr:
+        raise IndexError("List is empty")
+    print(f"Sum of numbers: {sum(arr)}")
 
 
 def mean(arr):
-    suma = sum(arr)
-    return suma / len(arr)
+    if not arr:
+        raise IndexError("List is empty")
+    size = len(arr)
+    mean_value = sum(arr) / size
+    print(f"Mean of numbers: {round(mean_value, 2)}")
 
 
-def get_parts(arr, num=mp.cpu_count()):
-    n = len(arr)
-    part_len = n // num
-    return [arr[(part_len * k):part_len * (k + 1)] for k in range(num)]
+try:
+    numbers = list(map(int, input("Enter numbers divided by spaces: ").split()))
+    print(numbers)
+    t_max = threading.Thread(target=max_number, args=(numbers,))
+    t_min = threading.Thread(target=min_number, args=(numbers,))
+    t_sum = threading.Thread(target=suma, args=(numbers,))
+    t_mean = threading.Thread(target=mean, args=(numbers,))
+
+    t_max.start()
+    t_min.start()
+    t_sum.start()
+    t_mean.start()
+
+    t_max.join()
+    t_min.join()
+    t_sum.join()
+    t_mean.join()
+
+except Exception as e:
+    print("Message: ", e)
 
 
-def get_arr(len=100_000):
-    return list(range(len))
+
+# task3
+file_numbers = "numbers.pickle"
+file_even_numbers = "even_numbers.pickle"
+file_odd_numbers = "odd_numbers.pickle"
 
 
-if __name__ == "__main__":
-    arr = get_arr()
-    parts = get_parts(arr)
-    with mp.Pool() as pool:
-        results = pool.map(func=mean, iterable=parts)
-    print("Results of pool: ", results)
-    print("Final mean result: ", mean(results))
+def write_numbers(numbers, file):
+    if not numbers:
+        raise IndexError("List is empty")
 
+    with open(file, 'wb') as pickle_file:
+        pickle.dump(numbers, pickle_file)
+
+
+def read_numbers(file):
+    with open(file, 'rb') as pickle_file:
+        read_num = pickle.load(pickle_file)
+    return read_num
+
+
+def even_numbers():
+    read_num = read_numbers(file_numbers)
+    even_num = []
+    for num in read_num:
+        if num % 2 == 0:
+            even_num.append(num)
+    write_numbers(even_num, file_even_numbers)
+    read_num = read_numbers(file_even_numbers)
+    print(read_num)
+
+
+def odd_numbers():
+    read_num = read_numbers(file_numbers)
+    odd_num = []
+    for num in read_num:
+        if num % 2 != 0:
+            odd_num.append(num)
+    write_numbers(odd_num, file_odd_numbers)
+    read_num = read_numbers(file_odd_numbers)
+    print(read_num)
+
+
+try:
+    numbers = list(map(int, input("Enter numbers divided by spaces: ").split()))
+    write_numbers(numbers, file_numbers)
+    t_even = threading.Thread(target=even_numbers, args=())
+    t_odd = threading.Thread(target=odd_numbers, args=())
+
+    t_even.start()
+    t_odd.start()
+
+    t_even.join()
+    t_odd.join()
+
+except Exception as e:
+    print("Message: ", e)
