@@ -1,0 +1,26 @@
+[
+    {
+        "name": "Alice",
+        "age": 15,
+        "grade": "A",
+        "courses": [
+            "Math"
+        ]
+    },
+    {
+        "name": "Marie",
+        "age": 35,
+        "grade": "A",
+        "courses": [
+            "English"
+        ]
+    },
+    {
+        "name": "Bob",
+        "age": 25,
+        "grade": "A",
+        "courses": [
+            "English"
+        ]
+    }
+]
