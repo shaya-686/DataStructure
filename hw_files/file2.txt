@@ -1,0 +1,5 @@
+Notes on the availability of these functions:
+The design of all built-in operating system dependent modules of Python is such that as long as the same functionality
+is available, it uses the same interface; for example, the function os.stat(path) returns stat information about path in
+the same format (which happens to have originated with the POSIX interface). Extensions peculiar to a particular operating
+system are also available through the os module, but using them is of course a threat to portability.
