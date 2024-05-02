@@ -1,0 +1,28 @@
+{
+    "Bob": [
+        "John",
+        "Kelly",
+        "Jack"
+    ],
+    "John": [
+        "Bob"
+    ],
+    "Kelly": [
+        "Bob"
+    ],
+    "Samanta": [
+        "Hanna"
+    ],
+    "Hanna": [
+        "Samanta"
+    ],
+    "Jack": [
+        "Bob"
+    ],
+    "Monika": [
+        "Emma"
+    ],
+    "Emma": [
+        "Monika"
+    ]
+}

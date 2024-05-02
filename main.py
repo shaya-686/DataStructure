@@ -1,62 +1,36 @@
-import pickle
-import gzip
+import json
 
-data = {"login": "some_login", "password": "123456"}
-
-
-#
-# serialized = pickle.dumps(data)
-#
-# print(serialized)
-#
-# read_data = pickle.loads(serialized)
-# print(type(read_data), read_data)
-# with open('data.pickle', 'wb') as file:
-#     pickle.dump(data, file)
-#
-# with open('data.pickle', 'rb') as file:
-#     read_data = pickle.load(file)
-#
-# print(type(read_data), read_data)
-# with gzip.open('data.gz', 'wb') as file:
-#     serialized = pickle.dumps(data)
-#     file.write(serialized)
-
-# with gzip.open('data.gz', 'rb') as file:
-#     serialized = file.read()
-#     read_data = pickle.loads(serialized)
-#
-# print(serialized)
-# print(type(read_data), read_data)
+n = 5
+friends = {}
 
 
-# task1
-class Person:
-    def __init__(self, name, age):
-        self.name = name
-        self.age = age
+def add_friends(first, second):
+    global friends
+    if first not in friends:
+        friends[first] = []
 
-    def print_info(self):
-        print(f'name: {self.name} with age {self.age}')
+    if second not in friends:
+        friends[second] = []
+
+    friends[first].append(second)
+    friends[second].append(first)
 
 
-person = Person("Anna", 31)
-# with open('person.pickle', 'wb') as file:
-#     pickle.dump(person, file)
-#
-# with open('person.pickle', 'rb') as file:
-#     read_person = pickle.load(file)
-#
-# print(type(read_person))
-# read_person.print_info()
+def export_to_json():
+    with open("friends.json", "w") as file:
+        json.dump(friends, file, indent=4)
 
-with gzip.open('person.gz', 'wb') as file:
-    person_serialized = pickle.dumps(person)
-    file.write(person_serialized)
 
-with gzip.open('person.gz', 'rb') as file:
-    read_data = file.read()
-    person_read = pickle.loads(read_data)
+def import_from_json():
+    global friends
+    with open("friends.json", "r") as file:
+        friends = json.load(file)
+    return friends
 
-print(type(person_read))
-person_read.print_info()
+
+for _ in range(n):
+    first_name, second_name = input("Enter two people name divided by spaces: ").split()
+    add_friends(first_name, second_name)
+
+export_to_json()
+print(import_from_json())
