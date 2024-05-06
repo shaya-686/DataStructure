@@ -1,14 +1,33 @@
-# server
 import socket
-import json
+import time
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
 server.bind(('127.0.0.1', 8080))
 server.listen(1)
+exit_flag = "exit"
+confirm_flag = "ok"
+chunk_size = 10
+loaded_file = "new_file.txt"
 
-with open("weather.json", 'r') as file:
-    weather_data = json.load(file)
+
+def load_file():
+    try:
+        with open(loaded_file, 'ab') as file:
+            while True:
+                client_file_data = client.recv(chunk_size)
+                if client_file_data.decode() == exit_flag:
+                    break
+                file.write(client_file_data)
+    except ConnectionError as e:
+        print("Message: ", e)
+        return False
+    except Exception as e:
+        print("Message: ", e)
+        return False
+    else:
+        print("File received")
+        return True
+
 
 while True:
     print("Waiting...")
@@ -17,14 +36,16 @@ while True:
 
     while True:
         request = client.recv(1024).decode()
-        if request == "exit":
+        if request == exit_flag:
             break
-        dct = json.loads(request)
-        response = "Not found"
-        for item in weather_data:
-            if item["country"] == dct["country"] and item["city"] == dct["city"]:
-                response = {"weather_forecast": item["weather_forecast"]}
-                break
-        client.send(json.dumps(response).encode())
+        elif request == confirm_flag:
+            response = input(f"'{exit_flag}' to break | '{confirm_flag}' to confirm file receiving: ")
+            client.send(response.encode())
+            if response == confirm_flag:
+                load_file()
+        else:
+            print("Finishing program...")
+            time.sleep(1)
+            break
 
     client.close()
